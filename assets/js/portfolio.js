@@ -59,7 +59,7 @@ window.addEventListener('hashchange',syncLocation);
 syncLocation();
 document.querySelector('#copy-project-link').addEventListener('click',async()=>{
  const button=document.querySelector('#copy-project-link');
- const url=new URL(location.href);url.hash='project/'+dialog.dataset.project;
+ const url=new URL('https://iabokahter.github.io/Portfolio/');url.hash='project/'+dialog.dataset.project;
  try{await navigator.clipboard.writeText(url.href);button.textContent='LINK COPIED ✓';}
  catch{const field=document.createElement('input');field.className='project-link-fallback';field.readOnly=true;field.value=url.href;field.setAttribute('aria-label','Project link — copy this URL');const old=document.querySelector('.project-link-fallback');if(old)old.remove();document.querySelector('#dialog-content').prepend(field);field.focus();field.select();button.textContent='SELECTED LINK BELOW';}
 });
