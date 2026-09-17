@@ -12,16 +12,34 @@ const projects = [
 {id:'usd',title:'USD Sequence Exporter',category:'tools',tag:'Unreal Engine / Pipeline',image:'images/usd.webp',summary:'From Blueprint animation to USD in a few clicks.',description:'An engine plugin that makes recording sequences and exporting them to USD straightforward. Built to solve the challenge of baking Blueprint-driven animation into animation sequences, with a focus on convenient installation and an artist-friendly workflow.',media:[['Plugin overview','images/usd.webp'],['Installation and workflow','images/usd-sequence-exporter-google-docs.png']]},
 {id:'arena',title:'Battle Arena Editor',category:'tools',tag:'Unity / Editor tooling',image:'images/WA.png',summary:'A focused workspace for artists to build battle arenas.',description:'A custom Unity editor that helps artists place and precisely align units without navigating the full Unity interface. Behind the simplified workflow, it manages encrypted data stored in separate files with custom serialization.',media:[['Arena editor','images/WA.png'],['Editor workflow','images/WA2.png']]}
 ];
+const categories = [
+ {id:'games',title:'Games',icon:'images/category-games.svg',intro:'Pick your next world.',description:'Mobile empires, multiplayer battles, and survival on the edge.'},
+ {id:'simulations',title:'Simulations',icon:'images/simulation-icon.png',intro:'Step into the experience.',description:'Interactive spaces, virtual walkthroughs, and immersive VR training.'},
+ {id:'tools',title:'Engine tools',icon:'images/category-tools.svg',intro:'Build better. Create more.',description:'Purpose-built tools that put artists and developers in control.'},
+ {id:'playable',title:'Playable ads',icon:'images/category-playable.svg',intro:'A little play goes a long way.',description:'Small interactive experiences that invite people to get involved.'}
+];
 const grid=document.querySelector('#projects');
-projects.forEach((project,index)=>{
- const card=document.createElement('button');card.className='project-card';card.dataset.project=project.id;card.dataset.category=project.category;
- const visual=project.image?`<img src="${project.image}" alt="${project.title} project preview" loading="lazy">`:`<video src="${project.video}#t=1" muted playsinline preload="metadata" aria-label="${project.title} preview"></video>`;
- card.innerHTML=`<div class="project-visual">${visual}<span class="project-index">${String(index+1).padStart(2,'0')} / ${project.category.toUpperCase()}</span><span class="project-open" aria-hidden="true">↗</span></div><div class="project-meta"><h3>${project.title}</h3><span>${project.tag}</span></div><p class="project-description">${project.summary}</p>`;
- grid.append(card);
+const categoryNav=document.querySelector('#category-nav');
+categories.forEach((category,index)=>{
+ const items=projects.filter(project=>project.category===category.id);
+ const count=String(items.length).padStart(2,'0');
+ const link=document.createElement('a');link.href='#'+category.id;link.className='category-tile category-'+category.id;
+ link.innerHTML=`<span class="tile-count">${count} PROJECT${items.length===1?'':'S'} <span>↘</span></span><img src="${category.icon}" alt=""><strong>${category.title}</strong>`;
+ categoryNav.append(link);
+ const section=document.createElement('section');section.id=category.id;section.className='category-section category-'+category.id;section.setAttribute('aria-labelledby',category.id+'-title');
+ section.innerHTML=`<div class="chapter-transition" aria-hidden="true"><span class="transition-word">${category.title}</span><span class="transition-shape" style="--shape:url('${new URL(category.icon, document.baseURI).href}')"></span></div><div class="chapter-content"><header class="chapter-heading"><div><span class="eyebrow">CHAPTER 0${index+1} / ${count} PROJECT${items.length===1?'':'S'}</span><h2 id="${category.id}-title">${category.title}<span>.</span></h2><p>${category.intro}</p></div><img src="${category.icon}" alt=""></header><p class="chapter-description">${category.description}</p><div class="project-grid"></div><a class="chapter-back" href="#work">↑ ALL CATEGORIES</a></div>`;
+ const chapterGrid=section.querySelector('.project-grid');
+ items.forEach(project=>{
+  const card=document.createElement('button');card.className='project-card';card.dataset.project=project.id;card.dataset.category=project.category;
+  const visual=project.image?`<img src="${project.image}" alt="${project.title} project preview" loading="lazy">`:`<video src="${project.video}#t=1" muted playsinline preload="metadata" aria-label="${project.title} preview"></video>`;
+  card.innerHTML=`<div class="project-visual">${visual}<span class="project-index">${String(projects.indexOf(project)+1).padStart(2,'0')} / ${project.category.toUpperCase()}</span><span class="project-open" aria-hidden="true">↗</span></div><div class="project-meta"><h3>${project.title}</h3><span>${project.tag}</span></div><p class="project-description">${project.summary}</p>`;
+  chapterGrid.append(card);
+ });
+ grid.append(section);
 });
-const filters=[...document.querySelectorAll('[data-filter]')];
-function filterProjects(category){filters.forEach(button=>{const active=button.dataset.filter===category;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});let count=0;document.querySelectorAll('.project-card').forEach(card=>{card.hidden=category!=='all'&&card.dataset.category!==category;if(!card.hidden)count++;});document.querySelector('#filter-status').textContent=`Showing ${count} projects`;}
-filters.forEach(button=>button.addEventListener('click',()=>filterProjects(button.dataset.filter)));
+// Reveal each incoming chapter through its own icon silhouette.
+const transitionObserver=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('is-visible');transitionObserver.unobserve(entry.target);}});},{threshold:.25});
+document.querySelectorAll('.chapter-transition').forEach(el=>transitionObserver.observe(el));
 const dialog=document.querySelector('#project-dialog');
 function openProject(id){const project=projects.find(p=>p.id===id);if(!project)return;const content=document.querySelector('#dialog-content');content.replaceChildren();const tag=document.createElement('span');tag.className='eyebrow';tag.textContent=project.tag;const title=document.createElement('h2');title.id='dialog-title';title.textContent=project.title;const description=document.createElement('p');description.textContent=project.description;content.append(tag,title,description);if(project.links){const links=document.createElement('div');links.className='store-links';project.links.forEach(([label,url])=>{const link=document.createElement('a');link.href=url;link.textContent=label+' ↗';link.target='_blank';link.rel='noopener noreferrer';links.append(link);});content.append(links);}project.media.forEach(([label,path])=>{const heading=document.createElement('h3');heading.textContent=label;const isVideo=/\.(mp4|webm)$/.test(path);const media=document.createElement(isVideo?'video':'img');media.src=path;if(isVideo){media.controls=true;media.preload='none';media.playsInline=true;media.setAttribute('aria-label',label);}else{media.alt=label;media.loading='lazy';}content.append(heading,media);});dialog.showModal();dialog.scrollTop=0;document.body.classList.add('modal-open');}
 document.querySelectorAll('[data-project]').forEach(button=>button.addEventListener('click',()=>openProject(button.dataset.project)));
@@ -30,5 +48,5 @@ dialog.addEventListener('click',event=>{const r=dialog.getBoundingClientRect();i
 dialog.addEventListener('close',()=>{dialog.querySelectorAll('video').forEach(video=>video.pause());document.body.classList.remove('modal-open');});
 document.querySelector('#year').textContent=new Date().getFullYear();
 // Preserve links to the former portfolio sections.
-function handleLegacyHash(){const category={'#sim':'simulations','#playable':'playable','#Plugins':'tools'}[location.hash];if(category){filterProjects(category);document.querySelector('#work').scrollIntoView();}}
+function handleLegacyHash(){const category={'#sim':'simulations','#Plugins':'tools'}[location.hash];if(category)document.getElementById(category).scrollIntoView();}
 window.addEventListener('hashchange',handleLegacyHash);handleLegacyHash();
