@@ -19,3 +19,5 @@ body{overflow-x:clip}
 @media(max-width:600px){.quick-categories a:nth-child(2),.category-nav a:nth-child(2){display:flex}}
 
 .is-visible .transition-shape{mask-size:250px;-webkit-mask-size:250px;transform:rotate(0deg)}@media(max-width:600px){.is-visible .transition-shape{mask-size:165px;-webkit-mask-size:165px;transform:none}.chapter-heading h2{font-size:10vw}.chapter-heading h2 span{display:none}}
+
+.dialog-bar{gap:10px}.dialog-bar>span{margin-right:auto}#copy-project-link{background:var(--orange);color:var(--ink)}.project-link-fallback{width:100%;padding:14px;margin-bottom:18px}@media(max-width:600px){.dialog-bar{padding:12px}.dialog-bar>span{font-size:8px}.dialog-bar button{padding:10px;font-size:10px}}
